@@ -102,6 +102,7 @@ Create Account For Professionals (Doctors, Astrologers, or etc.)
 ### 🔐 Role-Based Access
 ##### Admin: Full system control (users, appointments, settings).
 
+
 ##### Moderator: Manage all appointments + employee-level access.
 
 ##### Employee/Professional:
