@@ -53,19 +53,17 @@
                     <div class="modal-body">
                         <p><strong>Client:</strong> <span id="modalAppointmentName">N/A</span></p>
                         <p><strong>Service:</strong> <span id="modalService">N/A</span></p>
-                        <p><strong>Email:</strong> <span id="modalEmail">N/A</span></p>
                         <p><strong>Phone:</strong> <span id="modalPhone">N/A</span></p>
                         <p><strong>Staff:</strong> <span id="modalStaff">N/A</span></p>
                         <p><strong>Date & Time:</strong> <span id="modalStartTime">N/A</span></p>
                         {{-- <p><strong>End:</strong> <span id="modalEndTime">N/A</span></p> --}}
-                        <p><strong>Amount:</strong> <span id="modalAmount">N/A</span></p>
                         <p><strong>Notes:</strong> <span id="modalNotes">N/A</span></p>
                         <p><strong>Current Status:</strong> <span id="modalStatusBadge">N/A</span></p>
 
                         <div class="form-group">
                             <label><strong>Change Status:</strong></label>
                             <select name="status" class="form-control" id="modalStatusSelect">
-                                <option value="Pending payment">Pending payment</option>
+                                <option value="Pending">Pending</option>
                                 <option value="Processing">Processing</option>
                                 <option value="Confirmed">Confirmed</option>
                                 <option value="Cancelled">Cancelled</option>
@@ -204,21 +202,19 @@
     $('#modalAppointmentId').val(calEvent.id);
     $('#modalAppointmentName').text(calEvent.name || calEvent.title.split(' - ')[0] || 'N/A');
     $('#modalService').text(calEvent.service_title || calEvent.title.split(' - ')[1] || 'N/A');
-    $('#modalEmail').text(calEvent.email || 'N/A');
     $('#modalPhone').text(calEvent.phone || 'N/A');
     $('#modalStaff').text(calEvent.staff || 'N/A');
-    $('#modalAmount').text(calEvent.amount || 'N/A');
     $('#modalNotes').text(calEvent.description || calEvent.notes || 'N/A');
     $('#modalStartTime').text(moment(calEvent.start).format('MMMM D, YYYY h:mm A'));
     $('#modalEndTime').text(calEvent.end ? moment(calEvent.end).format('MMMM D, YYYY h:mm A') : 'N/A');
 
     // Get the status from the calendar event
-    var status = calEvent.status || 'Pending payment';
+    var status = calEvent.status || 'Pending';
     $('#modalStatusSelect').val(status);
 
     // Set status badge
     var statusColors = {
-        'Pending payment': '#f39c12',
+        'Pending': '#f39c12',
         'Processing': '#3498db',
         'Confirmed': '#2ecc71',
         'Cancelled': '#ff0000',

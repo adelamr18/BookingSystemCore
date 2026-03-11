@@ -40,11 +40,11 @@ class UserNotificationBookingUpdated extends Notification implements ShouldQueue
         ->subject('Booking Status Updated' )
         ->line('**Appointment Details:**')  // make content strong
         ->line('Name: '. $this->appointment['name'])
-        ->line('Phone: '. $this->appointment['phone'])
-        // ->line('Category: '. $this->appointment->service->category['title'])
+        ->line('SPID: '. ($this->appointment['spid'] ?? 'N/A'))
+        ->line('Mobile Number: '. ($this->appointment['mobile_number'] ?? $this->appointment['phone']))
+        ->line('Branch: '. ($this->appointment->branch->title ?? $this->appointment->service->category['title'] ?? 'N/A'))
         ->line('Service: '. $this->appointment->service['title'])
         ->line('Staff: '. $this->appointment->employee->user['name'])
-        ->line('Amount: '. $this->appointment['amount'])
         ->line('Appointment Date : ' . Carbon::parse($this->appointment['booking_date'])->format('d M Y'))
         ->line('Slot Time: '. $this->appointment['booking_time'])
         ->line('Thank you for using our application !');

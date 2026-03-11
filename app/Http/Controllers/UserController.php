@@ -13,11 +13,11 @@ use Hash;
 use Session;
 class UserController extends Controller
 {
+    private const ASSIGNABLE_ROLES = ['subscriber', 'employee', 'view_only'];
 
 
     public function index(Request $request)
     {
-        // Get the role type from the request (either 'employee', 'customer', or 'moderator')
         $users = User::latest()->get();
         return view('backend.user.index', compact('users'));
     }
@@ -38,8 +38,9 @@ class UserController extends Controller
             'sunday',
         ];
 
-        //$roles = Role::where('name', '!=', 'admin')->get();
-        $roles = Role::where('name', '!=', 'admin')->get();
+        $roles = Role::whereIn('name', self::ASSIGNABLE_ROLES)
+            ->orderByRaw("CASE name WHEN 'subscriber' THEN 1 WHEN 'view_only' THEN 2 WHEN 'employee' THEN 3 ELSE 99 END")
+            ->get();
         $services = Service::whereStatus(1)->get();
         return view('backend.user.create',compact('roles','services','days'));
     }
@@ -134,9 +135,9 @@ class UserController extends Controller
 
         //dd($employeeDays);
 
-        // Get all roles excluding 'admin'
-        $roles = Role::all();
-       // $roles = Role::where('name', '!=', 'admin')->get();
+        $roles = Role::whereIn('name', self::ASSIGNABLE_ROLES)
+            ->orderByRaw("CASE name WHEN 'subscriber' THEN 1 WHEN 'view_only' THEN 2 WHEN 'employee' THEN 3 ELSE 99 END")
+            ->get();
 
         // Get all active services
         $services = Service::whereStatus(1)->get();

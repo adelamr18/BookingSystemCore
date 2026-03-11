@@ -25,4 +25,14 @@ class Appointment extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function branch()
+    {
+        return $this->belongsTo(Category::class, 'branch_id');
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by_id');
+    }
 }

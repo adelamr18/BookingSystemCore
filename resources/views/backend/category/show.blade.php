@@ -1,18 +1,18 @@
 @extends('adminlte::page')
 
-@section('title', 'Add Category')
+@section('title', 'Show Branch')
 
 @section('content_header')
 
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0">Show Category</h1>
+                <h1 class="m-0">Show Branch</h1>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                    <li class="breadcrumb-item active">Category</li>
+                    <li class="breadcrumb-item active">Branch</li>
                 </ol>
             </div>
         </div>
@@ -48,9 +48,9 @@
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="form-group">
-                                <label>Category name*</label>
+                                <label>Branch name*</label>
                                 <input type="text" name="title" id="title" class="form-control @error('title') is-invalid @enderror"
-                                    placeholder="Category Name" value="{{ $category->title }}" / disabled>
+                                    placeholder="Branch Name" value="{{ $category->title }}" / disabled>
                                     @error('title')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -59,8 +59,8 @@
 
                         <div class="col-sm-12">
                             <div class="form-group">
-                                <label for="slug" class="form-label bg-light">Slug <small>Unique url of the
-                                        category</small></label>
+                                <label for="slug" class="form-label bg-light">Slug <small>Unique URL of the
+                                        branch</small></label>
                                 <input type="text" name="slug" value="{{ $category->slug }}" class="form-control  @error('slug') is-invalid @enderror" id="slug" disabled>
                                 @error('slug')
                                     <span class="text-danger">{{ $message }}</span>
@@ -70,7 +70,7 @@
 
                         <div class="col-sm-12">
                             <div class="form-group">
-                                <label>Select parent category*</label>
+                                <label>Select parent branch*</label>
                                 <select type="text" name="parent_id" class="form-control" disabled>
                                     <option value="">None</option>
                                     @if($categories)

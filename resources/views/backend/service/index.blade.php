@@ -63,7 +63,7 @@
                                                 Image
                                             </th>
                                             <th style="width: 10%">
-                                                Category
+                                                Branch
                                             </th>
                                             {{-- <th style="width: 10%">
                                                 Featured

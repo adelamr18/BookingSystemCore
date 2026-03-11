@@ -12,4 +12,9 @@ class Category extends Model
     {
         return $this->hasMany(Service::class);
     }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'branch_id');
+    }
 }

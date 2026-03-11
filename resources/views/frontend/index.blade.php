@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> {{ $setting->meta_title }}</title>
+    <title>{{ config('app.name') }}</title>
       <!-- SEO Meta Tags -->
       <meta name="description" content="{{ $setting->meta_description }}">
       <meta name="keywords" content="{{ $setting->meta_keywords }}">
@@ -24,7 +24,7 @@
         <nav class="navbar navbar-expand-lg navbar-light">
             <div class="container">
                 <a class="navbar-brand" href="#">
-                    <i class="bi bi-calendar-check"></i> AppointEase
+                    <i class="bi bi-calendar-check"></i> {{ config('app.name') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
@@ -55,14 +55,14 @@
     <div class="container">
         <div class="booking-container">
             <div class="booking-header">
-                <h2><i class="bi bi-calendar-check"></i> Appointment Booking</h2>
+                <h2><i class="bi bi-calendar-check"></i> {{ config('app.name') }}</h2>
                 <p class="mb-0">Book your appointment in a few simple steps</p>
             </div>
 
             <div class="booking-steps position-relative">
                 <div class="step active" data-step="1">
                     <div class="step-number">1</div>
-                    <div class="step-title">Category</div>
+                    <div class="step-title">Branch</div>
                 </div>
                 <div class="step" data-step="2">
                     <div class="step-number">2</div>
@@ -86,11 +86,11 @@
             </div>
 
             <div class="booking-content">
-                <!-- Step 1: Category Selection -->
+                <!-- Step 1: Branch Selection -->
                 <div class="booking-step active" id="step1">
-                    <h3 class="mb-4">Select a Category</h3>
+                    <h3 class="mb-4">Select a Branch (MEC)</h3>
                     <div class="row row-cols-1 row-cols-md-3 g-4" id="categories-container">
-                        <!-- Categories will be inserted here by jQuery -->
+                        <!-- Branches will be inserted here by jQuery -->
                     </div>
                 </div>
 
@@ -176,7 +176,7 @@
                         <div class="card-body">
                             <div class="summary-item">
                                 <div class="row">
-                                    <div class="col-md-4 text-muted">Category:</div>
+                                    <div class="col-md-4 text-muted">Branch:</div>
                                     <div class="col-md-8" id="summary-category"></div>
                                 </div>
                             </div>
@@ -204,33 +204,44 @@
                                     <div class="col-md-8" id="summary-duration"></div>
                                 </div>
                             </div>
-                            <div class="summary-item">
-                                <div class="row">
-                                    <div class="col-md-4 text-muted">Price:</div>
-                                    <div class="col-md-8" id="summary-price"></div>
-                                </div>
-                            </div>
 
                             <div class="mt-4">
-                                <h5>Your Information</h5>
+                                <h5>Participant Information</h5>
                                 <form id="customer-info-form">
                                     @csrf
                                     <div class="row g-3">
                                         <div class="col-md-6">
-                                            <label for="customer-name" class="form-label">Full Name</label>
-                                            <input type="text" class="form-control" id="customer-name" required>
+                                            <label for="spid" class="form-label">SPID (10 digits) <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="spid" name="spid" maxlength="10" pattern="[0-9]{10}" title="Exactly 10 digits" required>
                                         </div>
                                         <div class="col-md-6">
-                                            <label for="customer-email" class="form-label">Email</label>
-                                            <input type="email" class="form-control" id="customer-email" required>
+                                            <label for="sample_person_name" class="form-label">Sample Person Name <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="sample_person_name" name="sample_person_name" required>
                                         </div>
-                                        <div class="col-md-12">
-                                            <label for="customer-phone" class="form-label">Phone</label>
-                                            <input type="tel" class="form-control" id="customer-phone" required>
+                                        <div class="col-md-6">
+                                            <label for="mobile_number" class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                                            <input type="tel" class="form-control" id="mobile_number" name="mobile_number" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="visit_stage" class="form-label">Visit Stage <span class="text-danger">*</span></label>
+                                            <select class="form-control" id="visit_stage" name="visit_stage" required>
+                                                <option value="">Select stage</option>
+                                                <option value="first_visit">First Visit (Household)</option>
+                                                <option value="second_visit">Second Visit (MEC)</option>
+                                                <option value="third_visit">Third Visit (Follow-up MEC)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="interviewer_id" class="form-label">Interviewer ID <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="interviewer_id" name="interviewer_id" placeholder="e.g. inter20" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="supervisor_id" class="form-label">Supervisor ID <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="supervisor_id" name="supervisor_id" placeholder="e.g. sv01" required>
                                         </div>
                                         <div class="col-12">
                                             <label for="customer-notes" class="form-label">Notes (Optional)</label>
-                                            <textarea class="form-control" id="customer-notes" rows="3"></textarea>
+                                            <textarea class="form-control" id="customer-notes" name="notes" rows="3"></textarea>
                                         </div>
                                     </div>
                                 </form>
@@ -254,7 +265,7 @@
     <footer>
         <div class="container pb-2">
             <div class="row text-center">
-            <span>Designed & Developed by <a target="_blank" href="https://www.vfixtechnology.com">VFIX TECHNOLOGY</a></span>
+            <span>Designed &amp; Developed by CORE Transformation</span>
             </div>
         </div>
     </footer>
@@ -273,7 +284,7 @@
                     <h4 class="mt-3">Thank You!</h4>
                     <p>Your appointment has been successfully booked.</p>
                     <div class="alert alert-info mt-3">
-                        <p class="mb-0">A confirmation email has been sent to your email address.</p>
+                        <p class="mb-0">Booking reference has been generated.</p>
                     </div>
                     <div class="booking-details mt-4 text-start">
                         <h5>Booking Details:</h5>
@@ -382,20 +393,17 @@
                 $(".service-card").removeClass("selected");
                 $(this).addClass("selected");
 
-                const serviceId = $(this).data("service");
-                const serviceTitle = $(this).find('.card-title').text();
-                // const servicePrice = $(this).find('.fw-bold').text().replace('$', '');
-                const servicePrice = $(this).find('.fw-bold').text();
-                const serviceDuration = $(this).find('.card-text:contains("Duration:")').text().replace(
-                    'Duration: ', '');
+                                const serviceId = $(this).data("service");
+                                const serviceTitle = $(this).find('.card-title').text();
+                                const serviceDuration = $(this).find('.card-text:contains("Duration:")').text().replace(
+                                    'Duration: ', '');
 
-                // Store the selected service in booking state
-                bookingState.selectedService = {
-                    id: serviceId,
-                    title: serviceTitle,
-                    price: servicePrice,
-                    duration: serviceDuration
-                };
+                                // Store the selected service in booking state (no price for MEC)
+                                bookingState.selectedService = {
+                                    id: serviceId,
+                                    title: serviceTitle,
+                                    duration: serviceDuration || '60'
+                                };
 
                 // Reset subsequent selections
                 bookingState.selectedEmployee = null;
@@ -544,7 +552,7 @@
                 switch (step) {
                     case 1:
                         if (!bookingState.selectedCategory) {
-                            alert("Please select a category");
+                            alert("Please select a branch");
                             return false;
                         }
                         return true;
@@ -584,7 +592,7 @@
 
                 // Make AJAX request to get services for this category
                 $.ajax({
-                    url: `/categories/${categoryId}/services`,
+                    url: `/branches/${categoryId}/services`,
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {
@@ -593,33 +601,20 @@
 
                             // Update category name display
                             $(".selected-category-name").text(
-                                `Selected Category: ${services[0]?.category?.title || ''}`);
+                                `Selected Branch: ${services[0]?.category?.title || ''}`);
 
                             // Clear services container
                             $("#services-container").empty();
 
-                            // Add services with animation delay
+                            // Add services with animation delay (no price display for MEC)
                             services.forEach((service, index) => {
-                                // Determine the price display
-                                let priceDisplay;
-                                if (service.sale_price) {
-                                    // If sale price exists, show both with strike-through on original price
-                                    priceDisplay =
-                                        `<span class="text-decoration-line-through text-muted">${service.price}</span> <span class=" fw-bold">${service.sale_price}</span>`;
-                                } else {
-                                    // If no sale price, just show regular price normally
-                                    priceDisplay =
-                                        `<span class="fw-bold">${service.price}</span>`;
-                                }
-
                                 const serviceCard = `
                                     <div class="col animate-slide-in" style="animation-delay: ${index * 100}ms">
                                         <div class="card border h-100 service-card text-center p-2" data-service="${service.id}">
                                             <div class="card-body">
                                                 ${service.image ? `<img class="img-fluid rounded mb-2" src="uploads/images/service/${service.image}">` : ""}
                                                 <h5 class="card-title mb-1">${service.title}</h5>
-                                                <p class="card-text mb-1">${service.excerpt}</p>
-                                                <p class="card-text">${priceDisplay}</p>
+                                                <p class="card-text mb-1">${service.excerpt || ''}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -660,22 +655,9 @@
                             const employees = response.employees;
                             const service = response.service;
 
-                            // Determine the price display
-                            let priceDisplay;
-                            if (service.sale_price) {
-                                // If sale price exists, show both with strike-through on original price
-                                priceDisplay =
-                                    `<span class="">${service.sale_price}</span>`;
-                            } else {
-                                // If no sale price, just show regular price normally
-                                priceDisplay =
-                                    `<span class="fw-bold">${service.price}</span>`;
-                            }
-
                             // Update service name display
                             $(".selected-service-name").html(
-                                `Selected Service: ${service.title} (${bookingState.selectedService.price})`
-                                );
+                                `Selected Service: ${service.title}`);
 
                             // Clear employees container
                             $("#employees-container").empty();
@@ -954,18 +936,16 @@
 
 
             function updateSummary() {
-                // Find the selected category
+                // Find the selected branch (category)
                 const selectedCategory = categories.find(cat => cat.id == bookingState.selectedCategory);
 
                 // Update summary with booking details
                 $("#summary-category").text(selectedCategory ? selectedCategory.title : 'Not selected');
 
-                // Update service info - using the stored service object
+                // Update service info - using the stored service object (no price for MEC)
                 if (bookingState.selectedService) {
-                    $("#summary-service").text(
-                        `${bookingState.selectedService.title} (${bookingState.selectedService.price})`);
-                    $("#summary-duration").text(`${bookingState.selectedEmployee.slot_duration} minutes`);
-                    $("#summary-price").text(bookingState.selectedService.price);
+                    $("#summary-service").text(bookingState.selectedService.title);
+                    $("#summary-duration").text((bookingState.selectedEmployee && bookingState.selectedEmployee.slot_duration) ? `${bookingState.selectedEmployee.slot_duration} minutes` : '60 minutes');
                 }
 
                 // Update employee info
@@ -994,41 +974,39 @@
             function submitBooking() {
                 // Get form data
                 const form = $('#customer-info-form');
-                const csrfToken = form.find('input[name="_token"]').val(); // Get CSRF token from form
+                const csrfToken = form.find('input[name="_token"]').val();
 
-                // Prepare booking data
                 const bookingData = {
                     employee_id: bookingState.selectedEmployee.id,
                     service_id: bookingState.selectedService.id,
-                    name: $('#customer-name').val(),
-                    email: $('#customer-email').val(),
-                    phone: $('#customer-phone').val(),
+                    spid: $('#spid').val(),
+                    sample_person_name: $('#sample_person_name').val(),
+                    mobile_number: $('#mobile_number').val(),
+                    interviewer_id: $('#interviewer_id').val(),
+                    supervisor_id: $('#supervisor_id').val(),
+                    visit_stage: $('#visit_stage').val(),
+                    phone: $('#mobile_number').val(),
                     notes: $('#customer-notes').val(),
-                    amount: parseFloat(bookingState.selectedService.price.replace(/[^0-9.]/g, '')),
                     booking_date: bookingState.selectedDate,
                     booking_time: bookingState.selectedTime.start || bookingState.selectedTime,
-                    status: 'Pending payment',
-                    _token: csrfToken // Include CSRF token in payload
+                    status: 'Confirmed',
+                    _token: csrfToken
                 };
 
-                // Add user_id if authenticated (using JavaScript approach)
                 if (typeof currentAuthUser !== 'undefined' && currentAuthUser) {
                     bookingData.user_id = currentAuthUser.id;
                 }
 
-                // Show loading state
                 const nextBtn = $("#next-step");
                 nextBtn.prop('disabled', true).html(
                     '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...'
                 );
 
-                // Submit via AJAX
                 $.ajax({
                     url: '/bookings',
                     method: 'POST',
                     data: bookingData,
                     success: function(response) {
-                        // Update modal with booking details
                         const formattedDate = new Date(bookingState.selectedDate).toLocaleDateString(
                             'en-US', {
                                 weekday: 'long',
@@ -1038,21 +1016,19 @@
                             });
 
                         const bookingDetails = `
-                                <div class="mb-2"><strong>Customer:</strong> ${$("#customer-name").val()}</div>
+                                <div class="mb-2"><strong>SPID:</strong> ${$("#spid").val()}</div>
+                                <div class="mb-2"><strong>Participant:</strong> ${$("#sample_person_name").val()}</div>
                                 <div class="mb-2"><strong>Service:</strong> ${bookingState.selectedService.title}</div>
                                 <div class="mb-2"><strong>Staff:</strong> ${bookingState.selectedEmployee.user.name}</div>
                                 <div class="mb-2"><strong>Date & Time:</strong> ${formattedDate} at ${bookingState.selectedTime.display || bookingState.selectedTime}</div>
-                                 <div class="mb-2"><strong>Amount:</strong> ${bookingState.selectedService.price}</div>
                                 <div><strong>Reference:</strong> ${response.booking_id || 'BK-' + Math.random().toString(36).substr(2, 8).toUpperCase()}</div>
                             `;
 
                         $('#modal-booking-details').html(bookingDetails);
 
-                        // Show success modal
                         const successModal = new bootstrap.Modal('#bookingSuccessModal');
                         successModal.show();
 
-                        // Reset form after delay
                         setTimeout(resetBooking, 1000);
                     },
                     error: function(xhr) {
@@ -1060,8 +1036,11 @@
 
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            const errs = xhr.responseJSON.errors;
+                            errorMessage = Object.values(errs).flat().join(' ');
                         } else if (xhr.status === 422) {
-                            errorMessage = 'Validation error: Please check your information.';
+                            errorMessage = 'Validation error: Please check your information (SPID must be exactly 10 digits).';
                         }
 
                         alert(errorMessage);
@@ -1069,7 +1048,6 @@
                             'Confirm Booking <i class="bi bi-check-circle"></i>');
                     },
                     complete: function() {
-                        // Re-enable button if request fails
                         if (nextBtn.prop('disabled')) {
                             setTimeout(() => {
                                 nextBtn.prop('disabled', false).html(

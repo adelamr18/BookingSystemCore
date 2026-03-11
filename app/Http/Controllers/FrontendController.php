@@ -10,7 +10,6 @@ use App\Models\Setting;
 use App\Models\Appointment;
 use Spatie\OpeningHours\OpeningHours;
 use Carbon\Carbon;
-use Illuminate\Support\Number;
 use View;
 
 class FrontendController extends Controller
@@ -37,25 +36,12 @@ class FrontendController extends Controller
     }
 
 
-    public function getServices(Request $request, Category $category)
+    public function getServices(Request $request, Category $branch)
     {
-        $setting = Setting::firstOrFail();
-
-        $services = $category->services()
+        $services = $branch->services()
             ->where('status', 1)
             ->with('category')
-            ->get()
-            ->map(function ($service) use ($setting) {
-                if (isset($service->price)) {
-                    $service->price = Number::currency($service->price, $setting->currency);
-                }
-
-                if (isset($service->sale_price)) {
-                    $service->sale_price = Number::currency($service->sale_price, $setting->currency);
-                }
-
-                return $service;
-            });
+            ->get();
 
         return response()->json([
             'success' => true,

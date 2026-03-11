@@ -156,10 +156,14 @@
                                         @foreach ($roles as $role)
                                             <option value="{{ $role->name }}"
                                                 {{ in_array($role->name, old('roles', [])) ? 'selected' : '' }}>
-                                                {{ ucfirst($role->name) }}
+                                                @if($role->name === 'subscriber') Subscriber/Admin
+                                                @elseif($role->name === 'view_only') View-Only
+                                                @else {{ ucfirst($role->name) }}
+                                                @endif
                                             </option>
                                         @endforeach
                                     </select>
+                                    <small class="text-muted">Subscriber/Admin = full access; Employee = own appointments only; View-Only = read-only.</small>
                                     @error('roles')
                                         <small class="text-danger"><strong>{{ $message }}</strong></small>
                                     @enderror

@@ -31,7 +31,7 @@
                     @csrf
                     @method('DELETE')
                     <button
-                        onclick="return confirm('Category cannot be deleted - Post attached');"
+                        onclick="return confirm('Branch cannot be deleted - linked data exists');"
                         class="btn btn-danger btn-sm ml-2">
                         <i class="fas fa-trash"></i>
                         Delete

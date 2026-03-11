@@ -21,13 +21,11 @@ return new class extends Migration
             $table->foreignIdFor(Service::class);
             $table->string('booking_id');
             $table->string('name');
-            $table->string('email');
             $table->string('phone');
             $table->mediumText('notes')->nullable();
-            $table->decimal('amount', 8, 2);
             $table->date('booking_date');
             $table->string('booking_time');
-            $table->enum('status',['Pending payment','Processing','Confirmed','Cancelled','Completed','On Hold','Rescheduled','No Show']);
+            $table->enum('status',['Pending','Processing','Confirmed','Cancelled','Completed','On Hold','Rescheduled','No Show']);
             $table->json('other')->nullable();
             $table->softDeletes();
             $table->timestamps();

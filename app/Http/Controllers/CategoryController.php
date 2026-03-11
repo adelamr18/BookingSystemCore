@@ -33,6 +33,9 @@ class CategoryController extends Controller
         $data = $request->validate([
             'title' => 'required',
             'slug' => 'required|unique:categories,slug',
+            'city' => 'nullable|string|max:255',
+            'address' => 'nullable|string',
+            'map_link' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'body' => 'nullable|string',
             'featured' => 'nullable|boolean',
@@ -46,6 +49,9 @@ class CategoryController extends Controller
         $data['featured'] = $request->featured ?? 0;
         $data['status'] = $request->status ?? 0;
         $data['body'] = $request->body ?? '';
+        $data['city'] = $request->city ?? null;
+        $data['address'] = $request->address ?? null;
+        $data['map_link'] = $request->map_link ?? null;
 
         if($request->hasFile('image'))
         {
@@ -55,7 +61,7 @@ class CategoryController extends Controller
         }
 
         Category::create($data);
-        return redirect()->route('category.index')->withSuccess('Category has been created successfully!');
+        return redirect()->route('category.index')->withSuccess('Branch has been created successfully!');
     }
 
     /**
@@ -83,6 +89,9 @@ class CategoryController extends Controller
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => ['required', Rule::unique('categories')->ignore($category)],
+            'city' => 'nullable|string|max:255',
+            'address' => 'nullable|string',
+            'map_link' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'body' => 'nullable|string',
             'featured' => 'nullable|boolean',
@@ -96,6 +105,9 @@ class CategoryController extends Controller
         $data['featured'] = $request->featured ?? 0;
         $data['status'] = $request->status ?? 0;
         $data['body'] = $request->body ?? '';
+        $data['city'] = $request->city ?? null;
+        $data['address'] = $request->address ?? null;
+        $data['map_link'] = $request->map_link ?? null;
 
         if($request->delete_image)
         {
@@ -124,7 +136,7 @@ class CategoryController extends Controller
 
         }
         $category->update($data);
-        return redirect()->route('category.index')->with('success', 'Category has been updated successfully.');
+        return redirect()->route('category.index')->with('success', 'Branch has been updated successfully.');
     }
 
     /**
@@ -134,7 +146,7 @@ class CategoryController extends Controller
     {
         if($category->services->count())
        {
-            return back()->withErrors('Category cannot be deleted as it is linked to services.');
+            return back()->withErrors('Branch cannot be deleted as it is linked to services.');
        }
 
         $destination = public_path('uploads/images/category/'.$category->image);
@@ -143,6 +155,15 @@ class CategoryController extends Controller
             \File::delete($destination);
         }
         $category->delete();
-        return redirect()->back()->with('success', 'Category has been deleted successfully.');
+        return redirect()->back()->with('success', 'Branch has been deleted successfully.');
+    }
+
+    /**
+     * Branch report: all appointments for this MEC branch.
+     */
+    public function branchReport(Category $category)
+    {
+        $appointments = $category->appointments()->with(['service', 'employee.user'])->latest('booking_date')->get();
+        return view('backend.category.report', compact('category', 'appointments'));
     }
 }

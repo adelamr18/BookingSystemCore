@@ -78,12 +78,18 @@ class DatabaseSeeder extends Seeder
 
         // Create roles if they do not exist
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
-        $moderatorRole = Role::firstOrCreate(['name' => 'moderator']);
         $employeeRole = Role::firstOrCreate(['name' => 'employee']);
         $subscriberRole = Role::firstOrCreate(['name' => 'subscriber']);
+        $viewOnlyRole = Role::firstOrCreate(['name' => 'view_only']);
 
-        // Assign all permissions to the 'admin' role
+        // Admin and subscriber/admin both have full system access.
         $adminRole->syncPermissions(Permission::all());
+        $subscriberRole->syncPermissions(Permission::all());
+        $employeeRole->syncPermissions(Permission::whereIn('name', [
+            'appointments.view',
+            'appointments.create',
+            'appointments.edit',
+        ])->get());
 
         // Create the initial admin user
         $user = User::create([
@@ -95,25 +101,13 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('admin123'),
         ]);
 
-        // Assign specific permissions to the 'moderator' role
-        $moderatorPermissions = [
+        // View-Only: read-only access
+        $viewOnlyRole->syncPermissions(Permission::whereIn('name', [
             'appointments.view',
-            'appointments.create',
-            'appointments.edit',
-            'appointments.delete',
-
             'categories.view',
-            'categories.create',
-            'categories.edit',
-            'categories.delete',
-
             'services.view',
-            'services.create',
-            'services.edit',
-            'services.delete',
-        ];
-
-        $moderatorRole->syncPermissions(Permission::whereIn('name', $moderatorPermissions)->get());
+            'users.view',
+        ])->get());
 
         // Assign the 'admin' role to the user
         $user->assignRole($adminRole);
@@ -139,96 +133,48 @@ class DatabaseSeeder extends Seeder
 
     protected function createCategoriesAndServices(User $user)
     {
-        // Create categories
-        $categories = [
+        // MEC branches (Mobile Examination Centers) – replace old categories
+        $branches = [
             [
-                'title' => 'Astrology',
-                'slug' => 'astrology',
-                'body' => 'Get insights into your future with our expert astrologers.'
+                'title' => 'MEC1',
+                'slug' => 'mec1',
+                'body' => 'Mobile Examination Center 1 – National Health and Nutrition Survey Program.',
+                'city' => 'Jeddah',
+                'address' => '',
+                'map_link' => '',
             ],
             [
-                'title' => 'Dentist',
-                'slug' => 'dentist',
-                'body' => 'Professional dental care for your perfect smile.'
+                'title' => 'MEC2',
+                'slug' => 'mec2',
+                'body' => 'Mobile Examination Center 2 – National Health and Nutrition Survey Program.',
+                'city' => 'Jeddah',
+                'address' => '',
+                'map_link' => '',
             ],
             [
-                'title' => 'Skin Specialist',
-                'slug' => 'skin-specialist',
-                'body' => 'Expert care for all your dermatological needs.'
-            ]
+                'title' => 'MEC3',
+                'slug' => 'mec3',
+                'body' => 'Mobile Examination Center 3 – National Health and Nutrition Survey Program.',
+                'city' => 'Jeddah',
+                'address' => '',
+                'map_link' => '',
+            ],
         ];
 
-        $services = [];
+        foreach ($branches as $branchData) {
+            $branch = Category::create(array_merge($branchData, ['status' => 1, 'featured' => 0]));
 
-        foreach ($categories as $categoryData) {
-            $category = Category::create($categoryData);
-
-            // Create 2 services for each category
-            switch ($category->title) {
-                case 'Astrology':
-                    $services = [
-                        [
-                            'title' => 'Birth Chart Reading',
-                            'slug' => 'birth-chart-reading',
-                            'price' => 999,
-                            'excerpt' => 'Detailed analysis of your natal chart for life insights.'
-                        ],
-                        [
-                            'title' => 'Love Compatibility',
-                            'slug' => 'love-compatibility',
-                            'price' => 699,
-                            'excerpt' => 'Understand your relationship dynamics through astrology.'
-                        ]
-                    ];
-                    break;
-
-                case 'Dentist':
-                    $services = [
-                        [
-                            'title' => 'Teeth Cleaning',
-                            'slug' => 'teeth-cleaning',
-                            'price' => 750,
-                            'excerpt' => 'Professional cleaning to maintain oral health.'
-                        ],
-                        [
-                            'title' => 'Dental Implants',
-                            'slug' => 'dental-implants',
-                            'price' => 1500,
-                            'excerpt' => 'Restore your smile with permanent tooth replacements.'
-                        ]
-                    ];
-                    break;
-
-                case 'Skin Specialist':
-                    $services = [
-                        [
-                            'title' => 'Acne Treatment',
-                            'slug' => 'acne-treatment',
-                            'price' => 3500,
-                            'excerpt' => 'Customized solutions for clear, healthy skin.'
-                        ],
-                        [
-                            'title' => 'Anti-Aging Facial',
-                            'slug' => 'anti-aging-facial',
-                            'price' => 200,
-                            'excerpt' => 'Rejuvenate your skin and reduce signs of aging.'
-                        ]
-                    ];
-                    break;
-            }
-
-            foreach ($services as $serviceData) {
-                Service::create([
-                    'title' => $serviceData['title'],
-                    'slug' => $serviceData['slug'],
-                    'price' => $serviceData['price'],
-                    'excerpt' => $serviceData['excerpt'],
-                    'category_id' => $category->id
-                ]);
-            }
+            // One MEC examination service per branch (~1 hour, five tests)
+            Service::create([
+                'title' => 'MEC Health Examination',
+                'slug' => $branch->slug . '-health-examination',
+                'excerpt' => 'Approximately 1 hour – five tests conducted sequentially. National Health and Nutrition Survey.',
+                'category_id' => $branch->id,
+                'status' => 1,
+            ]);
         }
 
-        // Attach all services to the employee (not directly to user)
+        // Attach all services to the admin employee
         if ($user->employee) {
             $allServices = Service::all();
             $user->employee->services()->sync($allServices->pluck('id'));

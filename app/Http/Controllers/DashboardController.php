@@ -18,9 +18,14 @@ class DashboardController extends Controller
         // Start with base query
         $query = Appointment::query()->with(['employee.user', 'service', 'user']);
 
-        // Only admins can see all data - no conditions added
-        if (!$user->hasRole('admin')) {
-            $query->where(function($q) use ($user) {
+        if ($user->hasRole('employee')) {
+            $query->where('created_by_id', $user->id);
+        } elseif (
+            !$user->hasRole('admin') &&
+            !$user->hasRole('subscriber') &&
+            !$user->hasRole('view_only')
+        ) {
+            $query->where(function ($q) use ($user) {
                 if ($user->employee) {
                     $q->where('employee_id', $user->employee->id);
                 }
@@ -62,9 +67,7 @@ class DashboardController extends Controller
                     'start' => $startDateTime->toIso8601String(),
                     'end' => $endDateTime->toIso8601String(),
                     'description' => $appointment->notes,
-                    'email' => $appointment->email,
-                    'phone' => $appointment->phone,
-                    'amount' => $appointment->amount,
+                    'phone' => $appointment->mobile_number ?? $appointment->phone,
                     'status' => $appointment->status,
                     'staff' => $appointment->employee->user->name ?? 'Unassigned',
                     'color' => $this->getStatusColor($appointment->status),
@@ -85,7 +88,7 @@ class DashboardController extends Controller
     private function getStatusColor($status)
     {
         $colors = [
-            'Pending payment' => '#f39c12',
+            'Pending' => '#f39c12',
             'Processing' => '#3498db',
             'Confirmed' => '#2ecc71',
             'Cancelled' => '#ff0000',
@@ -99,15 +102,22 @@ class DashboardController extends Controller
     }
 
 
-    // In AppointmentController.php
     public function updateStatus(Request $request)
     {
         $request->validate([
             'appointment_id' => 'required|exists:appointments,id',
-            'status' => 'required|in:Pending payment,Processing,Confirmed,Cancelled,Completed,On Hold,No Show'
+            'status' => 'required|string',
         ]);
 
         $appointment = Appointment::findOrFail($request->appointment_id);
+
+        if (auth()->user()->hasRole('view_only')) {
+            return back()->withErrors('You do not have permission to update appointment status.');
+        }
+        if (auth()->user()->hasRole('employee') && $appointment->created_by_id !== auth()->id()) {
+            return back()->withErrors('You can only update appointments you created.');
+        }
+
         $appointment->status = $request->status;
         $appointment->save();
 

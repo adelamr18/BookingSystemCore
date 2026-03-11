@@ -159,10 +159,14 @@
                                         @foreach ($roles as $role)
                                             <option value="{{ $role->name }}"
                                                 @if ($user->roles->contains('name', $role->name) || in_array($role->name, old('roles', []))) selected @endif>
-                                                {{ ucfirst($role->name) }}
+                                                @if($role->name === 'subscriber') Subscriber/Admin
+                                                @elseif($role->name === 'view_only') View-Only
+                                                @else {{ ucfirst($role->name) }}
+                                                @endif
                                             </option>
                                         @endforeach
                                     </select>
+                                    <small class="text-muted">Subscriber/Admin = full access; Employee = own appointments only; View-Only = read-only.</small>
                                     @error('roles')
                                         <small class="text-danger"><strong>{{ $message }}</strong></small>
                                     @enderror
@@ -197,7 +201,7 @@
                         <div class="col-md-2">
                             <div class="form-group">
                                 <div class="custom-control custom-switch">
-                                    <!-- If user has the employee or moderator role, check the checkbox -->
+                                    <!-- If user has the employee role, check the checkbox -->
                                     <input type="checkbox" class="custom-control-input" id="is_employee"
                                         name="is_employee" @if ($user->employee == true) checked @endif>
                                     <label class="custom-control-label" for="is_employee">Is Employee</label>

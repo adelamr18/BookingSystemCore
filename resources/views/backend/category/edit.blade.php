@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title', 'Edit Category')
+@section('title', 'Edit Branch')
 
 @section('content_header')
 
@@ -12,7 +12,7 @@
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                    <li class="breadcrumb-item active">Edit Category</li>
+                    <li class="breadcrumb-item active">Edit Branch</li>
                 </ol>
             </div>
         </div>
@@ -47,7 +47,7 @@
                     <div class="col-md-8">
                         <div class="card card-light">
                             <div class="card-header">
-                                <h3 class="card-title">Edit Category
+                                <h3 class="card-title">Edit Branch (MEC)
                                 </h3>
                                 <div class="card-tools">
                                     <button type="button" class="btn btn-tool" data-card-widget="collapse"
@@ -83,6 +83,30 @@
 
                                     @error('slug')
                                         <p class="text-danger mb-0">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label class="mb-0">City</label>
+                                    <input class="form-control @error('city') is-invalid @enderror" type="text"
+                                        name="city" placeholder="e.g. Jeddah" value="{{ old('city', $category->city) }}">
+                                    @error('city')
+                                        <p class="text-danger">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label class="mb-0">Address</label>
+                                    <input class="form-control @error('address') is-invalid @enderror" type="text"
+                                        name="address" placeholder="MEC location address" value="{{ old('address', $category->address) }}">
+                                    @error('address')
+                                        <p class="text-danger">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label class="mb-0">Map / Location Link</label>
+                                    <input class="form-control @error('map_link') is-invalid @enderror" type="url"
+                                        name="map_link" placeholder="https://..." value="{{ old('map_link', $category->map_link) }}">
+                                    @error('map_link')
+                                        <p class="text-danger">{{ $message }}</p>
                                     @enderror
                                 </div>
 
@@ -175,7 +199,7 @@
                         <div class="sticky-top">
                             <div class="card card-primary sticky-bottom">
                                 <div class="card-header">
-                                    <h3 class="card-title">Category Details</h3>
+                                    <h3 class="card-title">Branch Details</h3>
                                     <div class="card-tools">
                                         <button type="button" class="btn btn-tool" data-card-widget="collapse"
                                             title="Collapse">

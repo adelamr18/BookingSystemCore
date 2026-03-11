@@ -49,8 +49,6 @@ class ServiceController extends Controller
             'meta_title'        => 'nullable',
             'meta_description'  => 'nullable',
             'meta_keywords'     => 'nullable',
-            'price'             => 'required|numeric|min:0', // Validation for price field
-            'sale_price'        => 'nullable|numeric|min:0', // Validation for price field
             'featured'          => 'nullable',
             'status'            => 'nullable',
             'other'             => 'nullable',
@@ -103,8 +101,6 @@ class ServiceController extends Controller
             'meta_title'        => 'nullable',
             'meta_description'  => 'nullable',
             'meta_keywords'     => 'nullable',
-            'price'             => 'required|numeric|min:0', // Validation for price field
-            'sale_price'        => 'nullable|numeric|min:0', // Validation for price field
             'featured'          => 'nullable',
             'status'            => 'nullable',
             'other'             => 'nullable',

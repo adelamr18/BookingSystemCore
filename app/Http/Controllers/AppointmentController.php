@@ -14,8 +14,14 @@ class AppointmentController extends Controller
 
     public function index()
     {
-        $appointments = Appointment::latest()->get();
-        // dd($appointments); // for debugging only
+        $user = auth()->user();
+        if ($user->hasRole('employee')) {
+            $appointments = Appointment::with(['employee.user', 'service', 'branch'])->where('created_by_id', $user->id)->latest()->get();
+        } elseif ($user->hasRole('view_only')) {
+            $appointments = Appointment::with(['employee.user', 'service', 'branch'])->latest()->get();
+        } else {
+            $appointments = Appointment::with(['employee.user', 'service', 'branch'])->latest()->get();
+        }
         return view('backend.appointment.index', compact('appointments'));
     }
 
@@ -37,39 +43,47 @@ class AppointmentController extends Controller
             'user_id' => 'nullable|exists:users,id',
             'employee_id' => 'required|exists:employees,id',
             'service_id' => 'required|exists:services,id',
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
+            'spid' => 'required|string|digits:10',
+            'sample_person_name' => 'required|string|max:255',
+            'mobile_number' => 'required|string|max:20',
+            'interviewer_id' => 'required|string|max:100',
+            'supervisor_id' => 'required|string|max:100',
+            'visit_stage' => 'required|in:first_visit,second_visit,third_visit',
+            'phone' => 'nullable|string|max:20',
             'notes' => 'nullable|string',
-            'amount' => 'required|numeric',
             'booking_date' => 'required|date',
             'booking_time' => 'required',
             'status' => 'required|string',
         ]);
 
-            // Set user_id if not provided but user is authenticated
-        // if (auth()->check() && !$request->has('user_id')) {
-        //     $validated['user_id'] = auth()->id();
-        // }
+        $service = \App\Models\Service::with('category')->findOrFail($validated['service_id']);
+        $branch = $service->category;
+
+        $validated['branch_id'] = $branch->id;
+        $validated['branch_address_snapshot'] = $branch->address;
+        $validated['branch_map_link_snapshot'] = $branch->map_link;
+        $validated['name'] = $validated['sample_person_name'];
+        $validated['booking_id'] = 'BK-' . strtoupper(uniqid());
 
         $isPrivilegedRole = auth()->check() && (
             auth()->user()->hasRole('admin') ||
-            auth()->user()->hasRole('moderator') ||
+            auth()->user()->hasRole('subscriber') ||
             auth()->user()->hasRole('employee')
         );
 
-            // If admin/moderator/employee is booking, user_id should be null
         if ($isPrivilegedRole) {
             $validated['user_id'] = null;
+            if (auth()->user()->hasRole('employee')) {
+                $validated['created_by_id'] = auth()->id();
+            } else {
+                $validated['created_by_id'] = null;
+            }
         } elseif (auth()->check() && !$request->has('user_id')) {
-            // Otherwise, assign user_id to the authenticated user
             $validated['user_id'] = auth()->id();
+            $validated['created_by_id'] = auth()->id();
+        } else {
+            $validated['created_by_id'] = null;
         }
-
-
-        // Generate unique booking ID
-        $validated['booking_id'] = 'BK-' . strtoupper(uniqid());
-
 
         $appointment = Appointment::create($validated);
 
@@ -123,6 +137,14 @@ class AppointmentController extends Controller
         ]);
 
         $appointment = Appointment::findOrFail($request->appointment_id);
+
+        if (auth()->user()->hasRole('view_only')) {
+            return redirect()->back()->withErrors('You do not have permission to update appointment status.');
+        }
+        if (auth()->user()->hasRole('employee') && $appointment->created_by_id !== auth()->id()) {
+            return redirect()->back()->withErrors('You can only update appointments you created.');
+        }
+
         $appointment->status = $request->status;
         $appointment->save();
 

@@ -1,18 +1,18 @@
 @extends('adminlte::page')
 
-@section('title', 'Add Category')
+@section('title', 'All Branches')
 
 @section('content_header')
 
     <div class="container-fluid">
         <div class="row ">
             <div class="col-sm-6">
-                <h1 class="m-0">All Categories</h1>
+                <h1 class="m-0">All Branches (MEC)</h1>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                    <li class="breadcrumb-item active">Category</li>
+                    <li class="breadcrumb-item active">Branch</li>
                 </ol>
             </div>
         </div>
@@ -107,10 +107,14 @@
 
                                             <div>
                                                 <a class="btn btn-info btn-sm ml-2"
+                                                    href="{{ route('branch.report', $category->id) }}">
+                                                    <i class="fas fa-file-alt"></i> Report
+                                                </a>
+                                            </div>
+                                            <div>
+                                                <a class="btn btn-info btn-sm ml-2"
                                                     href="{{ route('category.edit', $category->id) }}">
-                                                    <i class="fas fa-pencil-alt">
-                                                    </i>
-                                                    Edit
+                                                    <i class="fas fa-pencil-alt"></i> Edit
                                                 </a>
                                             </div>
                                             <div>
@@ -119,7 +123,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button
-                                                        onclick="return confirm('Category cannot be delted - Post attached');"
+                                                        onclick="return confirm('Branch cannot be deleted - services attached');"
                                                         class="btn btn-danger btn-sm ml-2">
                                                         <i class="fas fa-trash"></i>
                                                         Delete

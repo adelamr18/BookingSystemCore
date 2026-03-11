@@ -33,7 +33,6 @@
                         <p><strong>User:</strong> <span id="modalUserName"></span></p>
                         <p><strong>Service:</strong> <span id="modalService"></span></p>
                         <p><strong>Staff:</strong> <span id="modalStaff"></span></p>
-                        <p><strong>Amount:</strong> <span id="modalAmount"></span></p>
                         <p><strong>Date:</strong> <span id="modalDate"></span></p>
                         <p><strong>Time:</strong> <span id="modalTime"></span></p>
                         <p><strong>Notes:</strong> <span id="modalNotes"></span></p>
@@ -66,11 +65,9 @@
                         <div class="modal-body">
                             <p><strong>Client:</strong> <span id="modalAppointmentName">N/A</span></p>
                             <p><strong>Service:</strong> <span id="Service">N/A</span></p>
-                            <p><strong>Email:</strong> <span id="modalEmail">N/A</span></p>
                             <p><strong>Phone:</strong> <span id="modalPhone">N/A</span></p>
                             <p><strong>Staff:</strong> <span id="Staff">N/A</span></p>
                             <p><strong>Start:</strong> <span id="modalStartTime">N/A</span></p>
-                            <p><strong>Amount:</strong> <span id="Amount">N/A</span></p>
                             <p><strong>Notes:</strong> <span id="Notes">N/A</span></p>
                             <p><strong>Current Status:</strong> <span id="modalStatusBadgeforEmployee"></span></p>
 
@@ -78,7 +75,7 @@
                             <div class="form-group ">
                                 <label><strong>Status:</strong></label>
                                 <select name="status" class="form-control" id="modalStatusSelect">
-                                    <option value="Pending payment">Pending payment</option>
+                                    <option value="Pending">Pending</option>
                                     <option value="Processing">Processing</option>
                                     <option value="Confirmed">Confirmed</option>
                                     <option value="Cancelled">Cancelled</option>
@@ -825,7 +822,7 @@ if ($usingOldInput) {
                                                                         <td>
                                                                             @php
                                                                                 $statusColors = [
-                                                                                    'Pending payment' => '#f39c12',
+                                                                                    'Pending' => '#f39c12',
                                                                                     'Processing' => '#3498db',
                                                                                     'Confirmed' => '#2ecc71',
                                                                                     'Cancelled' => '#ff0000',
@@ -854,11 +851,9 @@ if ($usingOldInput) {
                                                                                 data-id="{{ $appointment->id }}"
                                                                                 data-name="{{ $appointment->name }}"
                                                                                 data-service="{{ $appointment->service->title }}"
-                                                                                data-email="{{ $appointment->email }}"
-                                                                                data-phone="{{ $appointment->phone }}"
+                                                                                data-phone="{{ $appointment->mobile_number ?? $appointment->phone }}"
                                                                                 data-employee="{{ $appointment->employee->user->name }}"
                                                                                 data-start="{{ $appointment->booking_date . ' ' . $appointment->booking_time }}"
-                                                                                data-amount="{{ $appointment->amount }}"
                                                                                 data-notes="{{ $appointment->notes }}"
                                                                                 data-status="{{ $appointment->status }}">View</button>
                                                                         </td>
@@ -913,7 +908,7 @@ if ($usingOldInput) {
                                                                         <td>
                                                                             @php
                                                                                 $statusColors = [
-                                                                                    'Pending payment' => '#f39c12',
+                                                                                    'Pending' => '#f39c12',
                                                                                     'Processing' => '#3498db',
                                                                                     'Confirmed' => '#2ecc71',
                                                                                     'Cancelled' => '#ff0000',
@@ -943,7 +938,6 @@ if ($usingOldInput) {
                                                                                 data-staff="{{ $appointment->employee->user->name }}"
                                                                                 data-date="{{ $appointment->booking_date }}"
                                                                                 data-time="{{ $appointment->booking_time }}"
-                                                                                data-amount="{{ $appointment->amount }}"
                                                                                 data-status="{{ $appointment->status }}"
                                                                                 data-notes="{{ $appointment->notes }}">
                                                                                 View
@@ -1181,21 +1175,19 @@ if ($usingOldInput) {
             $('#modalAppointmentId').val($(this).data('id'));
             $('#modalAppointmentName').text($(this).data('name'));
             $('#Service').text($(this).data('service'));
-            $('#modalEmail').text($(this).data('email'));
             $('#modalPhone').text($(this).data('phone'));
             $('#Staff').text($(this).data('employee'));
             $('#modalStartTime').text($(this).data('start'));
-            $('#Amount').text($(this).data('amount'));
             $('#Notes').text($(this).data('notes'));
             $('#modalStatusBadgeforEmployee').text($(this).data('status'));
 
             // Set status select
             var status = $(this).data('status');
-            $('#CurrentStatus').val(status);
+            $('#modalStatusSelect').val(status);
 
             // Set colored status badge
             var statusColors = {
-                'Pending payment': '#f39c12',
+                'Pending': '#f39c12',
                 'Processing': '#3498db',
                 'Confirmed': '#2ecc71',
                 'Cancelled': '#ff0000',
@@ -1216,7 +1208,7 @@ if ($usingOldInput) {
     {{-- user booking data --}}
     <script>
         const statusColors = {
-            'Pending payment': '#f39c12',
+            'Pending': '#f39c12',
             'Processing': '#3498db',
             'Confirmed': '#2ecc71',
             'Cancelled': '#ff0000',
@@ -1235,7 +1227,6 @@ if ($usingOldInput) {
             $('#modalService').text(button.data('service'));
             $('#modalStaff').text(button.data('staff'));
             $('#modalDate').text(button.data('date'));
-            $('#modalAmount').text(button.data('amount'));
             $('#modalTime').text(button.data('time'));
             $('#modalNotes').text(button.data('notes'));
 

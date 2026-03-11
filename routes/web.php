@@ -24,8 +24,14 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    //user
-    Route::resource('user',UserController::class)->middleware('permission:users.view| users.create | users.edit | users.delete');
+    // Users
+    Route::get('user', [UserController::class, 'index'])->name('user.index')->middleware('permission:users.view');
+    Route::get('user/create', [UserController::class, 'create'])->name('user.create')->middleware('permission:users.create');
+    Route::post('user', [UserController::class, 'store'])->name('user.store')->middleware('permission:users.create');
+    Route::get('user/{user}', [UserController::class, 'show'])->name('user.show')->middleware('permission:users.view');
+    Route::get('user/{user}/edit', [UserController::class, 'edit'])->name('user.edit')->middleware('permission:users.edit');
+    Route::match(['put', 'patch'], 'user/{user}', [UserController::class, 'update'])->name('user.update')->middleware('permission:users.edit');
+    Route::delete('user/{user}', [UserController::class, 'destroy'])->name('user.destroy')->middleware('permission:users.delete');
     //update user password
 
     //profile page
@@ -38,24 +44,37 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
     //delete profile image
     Route::patch('delete-profile-image/{user}',[UserController::class,'deleteProfileImage'])->name('delete.profile.image');
     //trash view for users
-    Route::get('user-trash', [UserController::class, 'trashView'])->name('user.trash');
-    Route::get('user-restore/{id}', [UserController::class, 'restore'])->name('user.restore');
+    Route::get('user-trash', [UserController::class, 'trashView'])->name('user.trash')->middleware('permission:users.delete');
+    Route::get('user-restore/{id}', [UserController::class, 'restore'])->name('user.restore')->middleware('permission:users.delete');
     //deleted permanently
-    Route::delete('user-delete/{id}', [UserController::class, 'force_delete'])->name('user.force.delete');
+    Route::delete('user-delete/{id}', [UserController::class, 'force_delete'])->name('user.force.delete')->middleware('permission:users.delete');
 
-    Route::get('settings', [SettingController::class, 'index'])->name('setting')->middleware('permission:setting update');
-    Route::post('settings/{setting}', [SettingController::class, 'update'])->name('setting.update');
+    Route::get('settings', [SettingController::class, 'index'])->name('setting')->middleware('permission:settings.edit');
+    Route::post('settings/{setting}', [SettingController::class, 'update'])->name('setting.update')->middleware('permission:settings.edit');
 
 
-    Route::resource('category', CategoryController::class)->middleware('permission:categories.view| categories.create | categories.edit | categories.delete');
+    Route::get('category', [CategoryController::class, 'index'])->name('category.index')->middleware('permission:categories.view');
+    Route::get('category/create', [CategoryController::class, 'create'])->name('category.create')->middleware('permission:categories.create');
+    Route::post('category', [CategoryController::class, 'store'])->name('category.store')->middleware('permission:categories.create');
+    Route::get('category/{category}', [CategoryController::class, 'show'])->name('category.show')->middleware('permission:categories.view');
+    Route::get('category/{category}/edit', [CategoryController::class, 'edit'])->name('category.edit')->middleware('permission:categories.edit');
+    Route::match(['put', 'patch'], 'category/{category}', [CategoryController::class, 'update'])->name('category.update')->middleware('permission:categories.edit');
+    Route::delete('category/{category}', [CategoryController::class, 'destroy'])->name('category.destroy')->middleware('permission:categories.delete');
 
+    Route::get('branch/{category}/report', [CategoryController::class, 'branchReport'])->name('branch.report')->middleware('permission:categories.view| appointments.view');
 
     // Services
-    Route::resource('service', ServiceController::class)->middleware('permission:services.view| services.create | services.edit | services.delete');
-    Route::get('service-trash', [ServiceController::class, 'trashView'])->name('service.trash');
-    Route::get('service-restore/{id}', [ServiceController::class, 'restore'])->name('service.restore');
+    Route::get('service', [ServiceController::class, 'index'])->name('service.index')->middleware('permission:services.view');
+    Route::get('service/create', [ServiceController::class, 'create'])->name('service.create')->middleware('permission:services.create');
+    Route::post('service', [ServiceController::class, 'store'])->name('service.store')->middleware('permission:services.create');
+    Route::get('service/{service}', [ServiceController::class, 'show'])->name('service.show')->middleware('permission:services.view');
+    Route::get('service/{service}/edit', [ServiceController::class, 'edit'])->name('service.edit')->middleware('permission:services.edit');
+    Route::match(['put', 'patch'], 'service/{service}', [ServiceController::class, 'update'])->name('service.update')->middleware('permission:services.edit');
+    Route::delete('service/{service}', [ServiceController::class, 'destroy'])->name('service.destroy')->middleware('permission:services.delete');
+    Route::get('service-trash', [ServiceController::class, 'trashView'])->name('service.trash')->middleware('permission:services.delete');
+    Route::get('service-restore/{id}', [ServiceController::class, 'restore'])->name('service.restore')->middleware('permission:services.delete');
     //deleted permanently
-    Route::delete('service-delete/{id}', [ServiceController::class, 'force_delete'])->name('service.force.delete');
+    Route::delete('service-delete/{id}', [ServiceController::class, 'force_delete'])->name('service.force.delete')->middleware('permission:services.delete');
 
 
     //summernote image
@@ -96,7 +115,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 
 //frontend routes
 //fetch services from categories
-Route::get('/categories/{category}/services', [FrontendController::class, 'getServices'])->name('get.services');
+Route::get('/branches/{branch}/services', [FrontendController::class, 'getServices'])->name('get.services');
 
 //fetch employee from category
 Route::get('/services/{service}/employees', [FrontendController::class, 'getEmployees'])->name('get.employees');
@@ -107,11 +126,9 @@ Route::get('/employees/{employee}/availability/{date?}', [FrontendController::cl
 
 //create appointment
 Route::post('/bookings', [AppointmentController::class, 'store'])->name('bookings.store');
-Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments')->middleware('permission:appointments.view| appointments.create | services.appointments | appointments.delete');
+Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments')->middleware(['auth', 'permission:appointments.view']);
 
-Route::post('/appointments/update-status', [AppointmentController::class, 'updateStatus'])->name('appointments.update.status');
+Route::post('/appointments/update-status', [AppointmentController::class, 'updateStatus'])->name('appointments.update.status')->middleware(['auth', 'permission:appointments.edit']);
 
 //update status from dashbaord
-Route::post('/update-status', [DashboardController::class, 'updateStatus'])->name('dashboard.update.status');
-
-
+Route::post('/update-status', [DashboardController::class, 'updateStatus'])->name('dashboard.update.status')->middleware(['auth', 'permission:appointments.edit']);
