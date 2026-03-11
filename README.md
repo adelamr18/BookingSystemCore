@@ -1,4 +1,4 @@
-# Appointment Booking System on Laravel made by Vfix Technology
+# CORE Booking System on Laravel
 
 A versatile and customizable appointment booking system designed for astrologers, doctors, consultants, Salons, Spas, Lawyers, Tutors, Career Coaches, Personal Trainers, Nutritionists, Home services, Plumbers, Electricians, Automotive and other professionals. Features include automated email notifications, multi-user roles, calendar-based scheduling, availability management, and holiday settings.
 
@@ -23,7 +23,7 @@ A versatile and customizable appointment booking system designed for astrologers
 1. Clone the repository:
 
 ```php
-git clone https://github.com/vfixtechnology/appointment-booking-system.git
+git clone <your-repository-url>
 ```
 ```php
 cd appointment-booking-system
@@ -122,9 +122,9 @@ For installation assistance, premium support, or custom feature development:
 #### Contact Our Team:
 📱 WhatsApp: https://wa.me/918447525204
 
-✉ Email: info@vfixtechnology.com
+✉ Email: <your-support-email>
 
-🌐 Website: https://www.vfixtechnology.com
+🌐 Website: <your-website-url>
 
 Paid support packages available for enterprise implementations and custom integrations.
 
@@ -138,4 +138,4 @@ If you find this package useful, please consider showing your support by:
 
 Your support helps maintain and improve this project for everyone.
 
-#### For any help or customization, visit https://www.vfixtechnology.com or email us info@vfixtechnology.com
+#### Designed & Developed by CORE Transformation

@@ -18,59 +18,74 @@
     @php( $password_reset_url = $password_reset_url ? url($password_reset_url) : '' )
 @endif
 
-@section('auth_header', __('adminlte::adminlte.login_message'))
+@php($defaultAuthError = 'These credentials do not match our records.')
+@php($friendlyAuthError = 'Invalid email or password.')
+@php($accountDisabledError = 'You account access is disabled')
+@php($emailError = $errors->first('email'))
+@php($passwordError = $errors->first('password'))
+@php($formError = null)
+
+@if ($emailError === $defaultAuthError || $passwordError === $defaultAuthError)
+    @php($formError = $friendlyAuthError)
+@elseif ($emailError === $accountDisabledError)
+    @php($formError = $accountDisabledError)
+@endif
+
+@section('auth_header')
+    <p class="mb-0">{{ __('adminlte::adminlte.login_message') }}</p>
+@stop
 
 @section('auth_body')
-@if (count($errors) > 0)
-<div class="alert alert-dismissable alert-danger mt-3">
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-    <strong>Whoops!</strong> There were some problems with your input.<br>
-    <ul>
-        @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-</div>
-@endif
     <form action="{{ $login_url }}" method="post">
         @csrf
 
-        {{-- Email field --}}
-        <div class="input-group mb-3">
-            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                   value="{{ old('email') }}" placeholder="{{ __('adminlte::adminlte.email') }}" autofocus>
+        @if ($formError)
+            <div class="alert alert-dismissable alert-danger auth-form-alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <strong>{{ $formError }}</strong>
+            </div>
+        @endif
 
-            <div class="input-group-append">
-                <div class="input-group-text">
-                    <span class="fas fa-envelope {{ config('adminlte.classes_auth_icon', '') }}"></span>
+        {{-- Email field --}}
+        <div class="auth-field mb-3">
+            <div class="input-group">
+                <input type="email" name="email" class="form-control @if($emailError && $emailError !== $defaultAuthError && $emailError !== $accountDisabledError) is-invalid @endif"
+                       value="{{ old('email') }}" placeholder="{{ __('adminlte::adminlte.email') }}" autofocus>
+
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-envelope {{ config('adminlte.classes_auth_icon', '') }}"></span>
+                    </div>
                 </div>
             </div>
 
-            @error('email')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
+            @if($emailError && $emailError !== $defaultAuthError && $emailError !== $accountDisabledError)
+                <span class="invalid-feedback d-block auth-inline-error" role="alert">
+                    <strong>{{ $emailError }}</strong>
                 </span>
-            @enderror
+            @endif
         </div>
 
         {{-- Password field --}}
-        <div class="input-group mb-3">
-            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
-                   placeholder="{{ __('adminlte::adminlte.password') }}">
+        <div class="auth-field mb-3">
+            <div class="input-group">
+                <input type="password" name="password" class="form-control @if($passwordError && $passwordError !== $defaultAuthError) is-invalid @endif"
+                       placeholder="{{ __('adminlte::adminlte.password') }}">
 
-            <div class="input-group-append">
-                <div class="input-group-text">
-                    <span class="fas fa-lock {{ config('adminlte.classes_auth_icon', '') }}"></span>
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-lock {{ config('adminlte.classes_auth_icon', '') }}"></span>
+                    </div>
                 </div>
             </div>
 
-            @error('password')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
+            @if($passwordError && $passwordError !== $defaultAuthError)
+                <span class="invalid-feedback d-block auth-inline-error" role="alert">
+                    <strong>{{ $passwordError }}</strong>
                 </span>
-            @enderror
+            @endif
         </div>
 
         {{-- Login field --}}
@@ -101,16 +116,7 @@
     @if($password_reset_url)
         <p class="my-0">
             <a href="{{ $password_reset_url }}">
-                {{ __('adminlte::adminlte.i_forgot_my_password') }}
-            </a>
-        </p>
-    @endif
-
-    {{-- Register link --}}
-    @if($register_url)
-        <p class="my-0">
-            <a href="{{ $register_url }}">
-                {{ __('adminlte::adminlte.register_a_new_membership') }}
+                Forget password ?
             </a>
         </p>
     @endif

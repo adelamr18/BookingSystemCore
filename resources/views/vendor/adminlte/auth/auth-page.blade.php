@@ -9,6 +9,7 @@
 @endif
 
 @section('adminlte_css')
+    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
     @stack('css')
     @yield('css')
 @stop
@@ -21,8 +22,6 @@
         {{-- Logo --}}
         <div class="{{ $auth_type ?? 'login' }}-logo">
             <a href="{{ $dashboard_url }}">
-
-                {{-- Logo Image --}}
                 @if (config('adminlte.auth_logo.enabled', false))
                     <img src="{{ asset(config('adminlte.auth_logo.img.path')) }}"
                          alt="{{ config('adminlte.auth_logo.img.alt') }}"
@@ -35,14 +34,16 @@
                          @if (config('adminlte.auth_logo.img.height', null))
                             height="{{ config('adminlte.auth_logo.img.height') }}"
                          @endif>
-                @else
+                @elseif (config('adminlte.logo_img'))
                     <img src="{{ asset(config('adminlte.logo_img')) }}"
                          alt="{{ config('adminlte.logo_img_alt') }}" height="50">
+                @else
+                    <div class="auth-logo-icon mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
                 @endif
-
-                {{-- Logo Label --}}
-                {!! config('adminlte.logo', '<b>Admin</b>LTE') !!}
-
+                <span class="d-block">{!! config('adminlte.logo', '<b>Admin</b>LTE') !!}</span>
+                <span class="auth-tagline d-block">MEC Appointment Scheduling</span>
             </a>
         </div>
 
@@ -69,7 +70,6 @@
                     @yield('auth_footer')
                 </div>
             @endif
-
         </div>
 
     </div>

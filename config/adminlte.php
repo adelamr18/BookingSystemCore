@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'title' => env('APP_NAME'),
+    'title' => 'CORE Booking System',
     'title_prefix' => '',
     'title_postfix' => '',
 
@@ -63,7 +63,7 @@ return [
     |
     */
 
-    'logo' => '<strong>' . env('APP_NAME') . '</strong>',
+    'logo' => '<strong>CORE Booking System</strong>',
     'logo_img' => '',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
@@ -312,11 +312,6 @@ return [
 
         // Sidebar items:
         [
-            'type' => 'sidebar-menu-search',
-            'text' => 'search',
-        ],
-
-        [
             'text' => 'Dashboard',
             'route' => 'home',
             'icon' => 'fas fa-fw fa-home',
@@ -331,7 +326,7 @@ return [
         ],
 
         [
-            'text' => 'Categories',
+            'text' => 'Branches (MEC)',
             'icon' => 'fas fa-fw fa-folder',
             'url'  => 'category*',
             'can'  => 'categories.view | categories.create | categories.edit | categories.delete',
@@ -411,7 +406,7 @@ return [
             'text' => 'Settings',
             'route'  => 'setting',
             'icon' => 'fas fa-fw fa-cog',
-            'can'  => 'setting update',
+            'can'  => 'settings.edit',
         ],
 
         // [
