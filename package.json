@@ -3,9 +3,11 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "test:e2e": "playwright test"
     },
     "devDependencies": {
+        "@playwright/test": "^1.52.0",
         "@popperjs/core": "^2.11.6",
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.4",
