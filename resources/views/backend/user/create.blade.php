@@ -152,10 +152,11 @@
 
                                 <div class="col-xs-12 col-sm-12 col-md-12 mb-3 select2-primary">
                                     <label class="my-0"><i class="fas fa-user-lock"></i> User Role</label>
-                                    <select name="roles[]" class="form-control select2 @error('roles[]') is-invalid @enderror" data-placeholder="Select Role" multiple>
+                                    <select name="role" class="form-control select2 @error('role') is-invalid @enderror" data-placeholder="Select Role">
+                                        <option value="">Select Role</option>
                                         @foreach ($roles as $role)
                                             <option value="{{ $role->name }}"
-                                                {{ in_array($role->name, old('roles', [])) ? 'selected' : '' }}>
+                                                {{ old('role') === $role->name ? 'selected' : '' }}>
                                                 @if($role->name === 'subscriber') Subscriber/Admin
                                                 @elseif($role->name === 'view_only') View-Only
                                                 @else {{ ucfirst($role->name) }}
@@ -164,7 +165,7 @@
                                         @endforeach
                                     </select>
                                     <small class="text-muted">Subscriber/Admin = full access; Employee = own appointments only; View-Only = read-only.</small>
-                                    @error('roles')
+                                    @error('role')
                                         <small class="text-danger"><strong>{{ $message }}</strong></small>
                                     @enderror
                                 </div>

@@ -11,6 +11,7 @@ use App\Models\Holiday;
 use App\Models\Employee;
 use Hash;
 use Session;
+use Illuminate\Validation\Rule;
 class UserController extends Controller
 {
     private const ASSIGNABLE_ROLES = ['subscriber', 'employee', 'view_only'];
@@ -57,7 +58,7 @@ class UserController extends Controller
             'email' => 'required|string|email|unique:users',
             'phone' => 'required|string|unique:users,phone',
             'password' => 'required|string|min:8|confirmed',
-            'roles' => 'required|exists:roles,name', // Validate role
+            'role' => ['required', 'string', Rule::in(self::ASSIGNABLE_ROLES)],
             'service' => 'nullable',
             'slot_duration' => 'nullable',
             'break_duration' => 'nullable',
@@ -74,8 +75,8 @@ class UserController extends Controller
             'password' => \Hash::make($data['password']),
         ]);
 
-        // Assign the role to the user
-        $user->assignRole($data['roles']);
+        // Enforce one assignable role per user.
+        $user->syncRoles([$data['role']]);
 
 
         // transform time slots into from and to combination
@@ -156,7 +157,11 @@ class UserController extends Controller
             'email' => 'sometimes|email|unique:users,email,' . $user->id ,
             'social.*' => 'sometimes',
             'password' => 'nullable|string|min:8|confirmed',
-            'roles' => 'nullable|array|exists:roles,name', // Validate roles array
+            'role' => array_filter([
+                $user->hasRole('admin') ? 'nullable' : 'required',
+                'string',
+                Rule::in(self::ASSIGNABLE_ROLES),
+            ]),
             'service' => 'nullable',
             'slot_duration' => function ($attribute, $value, $fail) use ($request) {
                 // Check if 'is_employee' is true and 'slot_duration' is missing
@@ -182,8 +187,8 @@ class UserController extends Controller
         // Block logged-in user from changing their own role or status
         if (\Auth::id() === $user->id) {
             // Check if roles key exists AND its value is different from current roles
-            if ($request->filled('roles') && !$user->hasAnyRole($request->roles)) {
-                return redirect()->back()->withErrors(['roles' => 'You cannot change your own role.']);
+            if ($request->filled('role') && !$user->hasRole($request->role) && !$user->hasRole('admin')) {
+                return redirect()->back()->withErrors(['role' => 'You cannot change your own role.']);
             }
 
             if ($request->has('status') && $request->status != $user->status) {
@@ -193,14 +198,9 @@ class UserController extends Controller
         }
 
 
-        // Always keep 'admin' role for super admin (user ID 1)
-        if ($user->id === 1 && (!in_array('admin', $request->roles ?? []))) {
-            return redirect()->back()->withErrors(['roles' => 'The first user must always have the admin role.']);
-        }
-
-        // Ensure admin role is not removed from any user who currently has it
-        if ($user->hasRole('admin') && !in_array('admin', $request->roles ?? [])) {
-            return redirect()->back()->withErrors(['roles' => 'The admin role cannot be removed.']);
+        // Internal admin users are preserved and not editable via the assignable role field.
+        if ($user->hasRole('admin') && $request->filled('role')) {
+            return redirect()->back()->withErrors(['role' => 'The admin role is managed internally and cannot be changed here.']);
         }
 
 
@@ -220,19 +220,10 @@ class UserController extends Controller
             'status' => $status,
         ]);
 
-        // Sync roles: Always retain admin role for the first user
-        if ($request->roles) {
-            $roles = $request->roles;
-
-            // Ensure admin role is present
-            if ($user->id === 1 || $user->hasRole('admin')) {
-                if (!in_array('admin', $roles)) {
-                    $roles[] = 'admin';
-                }
-            }
-
-            // Sync roles
-            $user->syncRoles($roles);
+        if ($user->id === 1 || $user->hasRole('admin')) {
+            $user->syncRoles(['admin']);
+        } elseif (!empty($data['role'])) {
+            $user->syncRoles([$data['role']]);
         }
 
 

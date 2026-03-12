@@ -45,15 +45,18 @@ class AppointmentController extends Controller
             'service_id' => 'required|exists:services,id',
             'spid' => 'required|string|digits:10',
             'sample_person_name' => 'required|string|max:255',
-            'mobile_number' => 'required|string|max:20',
+            'mobile_number' => ['required', 'regex:/^\d{10,15}$/'],
             'interviewer_id' => 'required|string|max:100',
             'supervisor_id' => 'required|string|max:100',
             'visit_stage' => 'required|in:first_visit,second_visit,third_visit',
-            'phone' => 'nullable|string|max:20',
+            'phone' => ['nullable', 'regex:/^\d{10,15}$/'],
             'notes' => 'nullable|string',
             'booking_date' => 'required|date',
             'booking_time' => 'required',
             'status' => 'required|string',
+        ], [
+            'mobile_number.regex' => 'Mobile number must contain only digits and be between 10 and 15 digits.',
+            'phone.regex' => 'Phone number must contain only digits and be between 10 and 15 digits.',
         ]);
 
         $service = \App\Models\Service::with('category')->findOrFail($validated['service_id']);

@@ -220,7 +220,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <label for="mobile_number" class="form-label">Mobile Number <span class="text-danger">*</span></label>
-                                            <input type="tel" class="form-control" id="mobile_number" name="mobile_number" required>
+                                            <input type="tel" class="form-control" id="mobile_number" name="mobile_number" minlength="10" maxlength="15" inputmode="numeric" pattern="[0-9]{10,15}" title="Mobile number must contain only digits and be 10 to 15 digits" required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="visit_stage" class="form-label">Visit Stage <span class="text-danger">*</span></label>
@@ -1040,7 +1040,7 @@
                             const errs = xhr.responseJSON.errors;
                             errorMessage = Object.values(errs).flat().join(' ');
                         } else if (xhr.status === 422) {
-                            errorMessage = 'Validation error: Please check your information (SPID must be exactly 10 digits).';
+                            errorMessage = 'Validation error: please check your SPID and mobile number.';
                         }
 
                         alert(errorMessage);
