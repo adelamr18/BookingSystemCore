@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEC Booking System - Implementation and Testing Guide</title>
+  <style>
+    :root {
+      --text: #1f2937;
+      --muted: #596579;
+      --line: #d9e0ea;
+      --head: #0f172a;
+      --bg-soft: #f8fafc;
+      --ok: #e8f7ee;
+      --ok-text: #166534;
+      --partial: #fff7e6;
+      --partial-text: #92400e;
+      --skip: #fef2f2;
+      --skip-text: #991b1b;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: var(--text);
+      background: #ffffff;
+      line-height: 1.55;
+    }
+    .page {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+    }
+    h1, h2 {
+      color: var(--head);
+      margin: 0 0 12px;
+    }
+    h1 {
+      font-size: 2rem;
+      border-bottom: 3px solid var(--head);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+    }
+    h2 {
+      font-size: 1.3rem;
+      margin-top: 32px;
+    }
+    p, li {
+      font-size: 0.97rem;
+    }
+    .meta {
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .note, .setup {
+      background: var(--bg-soft);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin: 18px 0;
+    }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 14px 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 20px;
+      font-size: 0.93rem;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 12px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: var(--bg-soft);
+      color: var(--head);
+      font-weight: 700;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .implemented { background: var(--ok); color: var(--ok-text); }
+    .partial { background: var(--partial); color: var(--partial-text); }
+    .not-implemented { background: var(--skip); color: var(--skip-text); }
+    ul.checklist {
+      list-style: none;
+      padding-left: 0;
+      margin: 12px 0 0;
+    }
+    ul.checklist li {
+      padding-left: 26px;
+      position: relative;
+      margin: 8px 0;
+    }
+    ul.checklist li::before {
+      content: "☐";
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-weight: 700;
+    }
+    .no-print {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 18px;
+    }
+    @media print {
+      .page { max-width: none; padding: 0; }
+      .no-print { display: none; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <p class="no-print"><strong>How to save as PDF:</strong> open this file in a browser and use Print -&gt; Save as PDF.</p>
+
+    <h1>MEC Booking System - Implementation and Testing Guide</h1>
+
+    <p class="meta">
+      <strong>Purpose:</strong> Map each requirement from the original <em>CORE Booking System - MEC Project Requirements Specification</em> to the current implementation and provide clear UAT steps.<br>
+      <strong>Original document:</strong> CORE Booking System - MEC Project Requirements Specification.pdf<br>
+      <strong>Updated against codebase:</strong> March 12, 2026<br>
+      <strong>Scope note:</strong> This guide stays aligned to the MEC requirements document. Recent CORE branding and login UI polish are outside the PDF scope and are not detailed here.
+    </p>
+
+    <div class="note">
+      Items explicitly marked in the PDF as <strong>Requires Further Discussion</strong> remain excluded from the implementation checklist, except the <strong>roles/access-control</strong> section, which is implemented and documented below.
+    </div>
+
+    <div class="setup">
+      <strong>Test setup</strong>
+      <pre>php artisan migrate:fresh --seed
+php artisan optimize:clear</pre>
+      <p><strong>Seeded admin login</strong><br>Email: <code>admin@example.com</code><br>Password: <code>admin123</code></p>
+      <p><strong>Legend</strong><br><span class="status implemented">Implemented</span> aligned with the current app<br><span class="status partial">Partial</span> present with a limitation relative to the PDF<br><span class="status not-implemented">Not implemented</span> intentionally deferred because it needs clarification</p>
+    </div>
+
+    <h2>1. Participant Visit Workflow and MEC Clinics</h2>
+    <table>
+      <tr>
+        <th>Original PDF requirement</th>
+        <th>Current implementation</th>
+        <th>Status</th>
+        <th>How to test</th>
+      </tr>
+      <tr>
+        <td>Participant can have multiple appointments across stages.</td>
+        <td><code>spid</code> is not unique; each appointment stores its own <code>visit_stage</code>.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Book two appointments with the same SPID and different dates/stages. In <strong>All Appointments</strong>, confirm both records exist.</td>
+      </tr>
+      <tr>
+        <td>Three stages: First Visit, Second Visit, Third Visit.</td>
+        <td>Booking form stores <code>first_visit</code>, <code>second_visit</code>, or <code>third_visit</code>.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Complete bookings using different stage values and confirm the selected stage appears in the appointment details.</td>
+      </tr>
+      <tr>
+        <td>Three MEC clinics: MEC1, MEC2, MEC3.</td>
+        <td>Seeder creates MEC1, MEC2, MEC3 as branches.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>After seeding, confirm <strong>Branches (MEC)</strong> shows MEC1, MEC2, MEC3.</td>
+      </tr>
+      <tr>
+        <td>MEC appointment takes about 1 hour and covers five sequential tests.</td>
+        <td>The service description says the MEC exam is approximately 1 hour with five tests. Actual slot duration still follows employee <code>slot_duration</code>, and the seeded admin employee defaults to 30 minutes.</td>
+        <td><span class="status partial">Partial</span></td>
+        <td>Check the service description, then inspect available slots. Slot size is configurable and not locked to 60 minutes.</td>
+      </tr>
+    </table>
+
+    <h2>2. Branch Structure Instead of Categories</h2>
+    <table>
+      <tr>
+        <th>Original PDF requirement</th>
+        <th>Current implementation</th>
+        <th>Status</th>
+        <th>How to test</th>
+      </tr>
+      <tr>
+        <td>Replace Category with Branch.</td>
+        <td>User-facing MEC flow now uses <strong>Branch</strong> / <strong>Branches (MEC)</strong> in the admin and frontend booking flow.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Confirm the sidebar says <strong>Branches (MEC)</strong> and the frontend first step says <strong>Select a Branch (MEC)</strong>.</td>
+      </tr>
+      <tr>
+        <td>Flow should start with Branch selection.</td>
+        <td>Public booking flow now loads services from <code>/branches/{branch}/services</code>.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Open <code>/</code>, select a branch, and confirm services load after the branch selection step.</td>
+      </tr>
+      <tr>
+        <td>Branch example should be MEC1 / MEC2 / MEC3.</td>
+        <td>Seed data and UI use MEC1, MEC2, MEC3.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Verify the branch cards or branch list after seeding.</td>
+      </tr>
+    </table>
+
+    <p class="meta">Note: some legacy internal file/class names still use <code>Category</code> because the underlying model/table was reused. The user-facing workflow is branch-based.</p>
+
+    <h2>3. Branch Data Requirements</h2>
+    <table>
+      <tr>
+        <th>Original PDF requirement</th>
+        <th>Current implementation</th>
+        <th>Status</th>
+        <th>How to test</th>
+      </tr>
+      <tr>
+        <td>Each branch stores Branch Name, City, Address, Map link.</td>
+        <td>Branch create/edit forms include <code>title</code>, <code>city</code>, <code>address</code>, <code>map_link</code>.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Go to <strong>Branches (MEC)</strong> -&gt; <strong>Add New</strong> or <strong>Edit</strong> and confirm those fields are available and saved.</td>
+      </tr>
+      <tr>
+        <td>Exact branch location at booking time must be preserved in appointment history.</td>
+        <td>Appointments store <code>branch_id</code>, <code>branch_address_snapshot</code>, and <code>branch_map_link_snapshot</code>.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Change MEC1 address/map link, book an appointment, change the location again, then book another and verify the snapshot data in DB or Tinker.</td>
+      </tr>
+      <tr>
+        <td>Map integration / map API.</td>
+        <td>Storage only. No Google Maps API integration or visualization layer.</td>
+        <td><span class="status not-implemented">Not implemented</span></td>
+        <td>Skip.</td>
+      </tr>
+      <tr>
+        <td>Appointment counts on map / KML visualization.</td>
+        <td>Not built.</td>
+        <td><span class="status not-implemented">Not implemented</span></td>
+        <td>Skip.</td>
+      </tr>
+    </table>
+
+    <pre>php artisan tinker --execute="App\\Models\\Appointment::select('spid','branch_address_snapshot','branch_map_link_snapshot')->latest()->take(2)->get()->toArray();"</pre>
+
+    <h2>4. Removal of Payment Functionality</h2>
+    <table>
+      <tr>
+        <th>Original PDF requirement</th>
+        <th>Current implementation</th>
+        <th>Status</th>
+        <th>How to test</th>
+      </tr>
+      <tr>
+        <td>Remove service pricing fields and payment workflow.</td>
+        <td>Service create/edit screens no longer show <code>price</code> or <code>sale_price</code>. Active MEC schema no longer keeps those fields.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Open <strong>Services</strong> -&gt; <strong>Add New</strong> or <strong>Edit</strong> and confirm there are no price inputs.</td>
+      </tr>
+      <tr>
+        <td>Remove appointment amount and payment references.</td>
+        <td>New/updated schema removes <code>amount</code>; appointment UI no longer shows amount.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Open <strong>All Appointments</strong> and the appointment modal; confirm there is no amount field.</td>
+      </tr>
+      <tr>
+        <td>Remove commercial payment behavior.</td>
+        <td>Frontend booking flow has no price display, no amount summary, and no payment step.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Complete a booking from <code>/</code> and confirm the summary and success modal do not mention price or payment.</td>
+      </tr>
+      <tr>
+        <td>Remove old <code>Pending payment</code> behavior.</td>
+        <td>New UI uses <code>Pending</code>, <code>Confirmed</code>, <code>Cancelled</code>, <code>Completed</code>, <code>On Hold</code>, <code>No Show</code>.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Open any appointment modal and confirm <code>Pending payment</code> is not available.</td>
+      </tr>
+    </table>
+
+    <pre>php artisan tinker --execute="dump(Schema::hasColumn('appointments','amount'), Schema::hasColumn('services','price'), Schema::hasColumn('services','sale_price'));"</pre>
+
+    <h2>5. Email Collection Removal</h2>
+    <table>
+      <tr>
+        <th>Original PDF requirement</th>
+        <th>Current implementation</th>
+        <th>Status</th>
+        <th>How to test</th>
+      </tr>
+      <tr>
+        <td>Remove participant email from booking.</td>
+        <td>Frontend booking form no longer asks for email.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Go through the booking flow and confirm there is no email field in participant information.</td>
+      </tr>
+      <tr>
+        <td>Remove email from appointment storage.</td>
+        <td>Active MEC schema removes appointment email storage.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Verify via UI or Tinker that appointment email is not part of the record structure anymore.</td>
+      </tr>
+      <tr>
+        <td>Communication should not depend on participant email.</td>
+        <td>Participant-facing email listeners were disabled; no participant email is sent on booking/status update. SMS is still pending and remains outside the implemented scope.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Trigger a booking and confirm there is no participant email workflow.</td>
+      </tr>
+    </table>
+
+    <pre>php artisan tinker --execute="dump(Schema::hasColumn('appointments','email'));"</pre>
+
+    <h2>6. Participant Information Fields</h2>
+    <table>
+      <tr>
+        <th>Original PDF requirement</th>
+        <th>Current implementation</th>
+        <th>Status</th>
+        <th>How to test</th>
+      </tr>
+      <tr>
+        <td>SPID must be numeric and exactly 10 digits.</td>
+        <td>Backend validates <code>digits:10</code>; stored in <code>appointments.spid</code>.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Try 9 digits or 11 digits and confirm validation fails. Then book with <code>1234567890</code>.</td>
+      </tr>
+      <tr>
+        <td>Sample Person Name required.</td>
+        <td>Stored in <code>sample_person_name</code> and mirrored into <code>name</code> for legacy compatibility.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Leave blank and confirm validation. Then save and confirm it appears in appointment listings.</td>
+      </tr>
+      <tr>
+        <td>Mobile Number should be valid.</td>
+        <td>Field exists and is required, but backend currently validates it as a string up to 20 chars rather than a strict numeric/phone pattern.</td>
+        <td><span class="status partial">Partial</span></td>
+        <td>Leave blank and confirm validation fails. Enter a non-phone string and note that current backend validation is permissive.</td>
+      </tr>
+      <tr>
+        <td>Interviewer ID required.</td>
+        <td>Stored in <code>interviewer_id</code>.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Book with <code>inter20</code> and confirm it appears in the appointment modal and branch report.</td>
+      </tr>
+      <tr>
+        <td>Supervisor ID required.</td>
+        <td>Stored in <code>supervisor_id</code>.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Book with <code>sv01</code> and confirm it appears in the appointment modal and branch report.</td>
+      </tr>
+    </table>
+
+    <h2>7. Visit Stage Handling</h2>
+    <table>
+      <tr>
+        <th>Original PDF requirement</th>
+        <th>Current implementation</th>
+        <th>Status</th>
+        <th>How to test</th>
+      </tr>
+      <tr>
+        <td>First Visit (Household), Second Visit (MEC), Third Visit (Follow-up MEC).</td>
+        <td>Booking form exposes all three stage options and stores the selected value.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Book one appointment for each stage and verify the appointment modal and appointment list reflect the stored stage where exposed.</td>
+      </tr>
+    </table>
+
+    <p class="meta">Note: the branch report does not currently display the visit stage column; the appointment modal and appointment list do.</p>
+
+    <h2>8. Branch Reporting Requirement</h2>
+    <table>
+      <tr>
+        <th>Original PDF requirement</th>
+        <th>Current implementation</th>
+        <th>Status</th>
+        <th>How to test</th>
+      </tr>
+      <tr>
+        <td>Each branch must generate its own report.</td>
+        <td>Branch list includes a <strong>Report</strong> action that loads appointments filtered by branch.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Create appointments in MEC1 and MEC2. Open MEC1 report and confirm only MEC1 appointments are shown.</td>
+      </tr>
+      <tr>
+        <td>Report fields: Branch, Appointment Date, Appointment Time, SPID, Sample Person Name, Mobile Number, Interviewer ID, Supervisor ID, Status.</td>
+        <td>Branch report contains exactly these columns.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Open any branch report and confirm all listed columns are present.</td>
+      </tr>
+      <tr>
+        <td>Print-friendly reporting.</td>
+        <td>Report page includes a <strong>Print</strong> button and print CSS hides sidebar/navbar/footer.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Use the branch report <strong>Print</strong> button and confirm the report is printable without admin chrome.</td>
+      </tr>
+    </table>
+
+    <h2>9. User Roles and Access Control</h2>
+    <table>
+      <tr>
+        <th>Original PDF requirement</th>
+        <th>Current implementation</th>
+        <th>Status</th>
+        <th>How to test</th>
+      </tr>
+      <tr>
+        <td>Three assignable roles only: Subscriber/Admin, View-Only, Employee.</td>
+        <td>User create/edit dropdown exposes exactly these three labels. Internal <code>admin</code> remains for the seeded super-admin but is not an assignable UI option.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Open <strong>Users</strong> -&gt; <strong>Add New</strong> and confirm the dropdown contains only those three labels.</td>
+      </tr>
+      <tr>
+        <td>Subscriber/Admin has full system access.</td>
+        <td><code>subscriber</code> is granted full permissions and is labeled <code>Subscriber/Admin</code> in UI. Seeded <code>admin</code> also retains full access.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Log in as admin or assign a subscriber user and confirm access to Users, Branches, Services, Appointments, and Settings.</td>
+      </tr>
+      <tr>
+        <td>Employee can create/view/edit only the appointments they created.</td>
+        <td>Employee permissions are limited to <code>appointments.view</code>, <code>appointments.create</code>, <code>appointments.edit</code>. Appointment list/dashboard are filtered by <code>created_by_id</code>, and status updates are rejected for appointments created by others.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Log in as an employee, create an appointment, then compare against an appointment created by another user. Confirm the employee only sees and edits their own records.</td>
+      </tr>
+      <tr>
+        <td>Employee must not manage branches, services, users, or settings.</td>
+        <td>Route protection is per action, not a broad OR check. Employee cannot access create/edit/delete screens outside appointments.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>As an employee, try URLs like <code>/category/create</code>, <code>/service/create</code>, <code>/user/create</code>, <code>/settings</code>. Access should be denied.</td>
+      </tr>
+      <tr>
+        <td>View-Only can review data but cannot modify it.</td>
+        <td><code>view_only</code> has read-only permissions. The appointment modal hides the update button, and backend status updates are blocked.</td>
+        <td><span class="status implemented">Implemented</span></td>
+        <td>Log in as a view-only user. Open an appointment and confirm there is no <strong>Update Status</strong> button. Try posting a status update and confirm rejection.</td>
+      </tr>
+    </table>
+
+    <p class="meta">Important current behavior: appointment ownership for employee restrictions is based on <code>created_by_id</code>. If an admin creates an appointment on behalf of an employee, that appointment is still treated as admin-created, not employee-created.</p>
+
+    <h2>10. Items Not Implemented Because the PDF Marked Them for Further Clarification</h2>
+    <table>
+      <tr>
+        <th>Original PDF area</th>
+        <th>Status</th>
+      </tr>
+      <tr><td>Google Maps API integration</td><td><span class="status not-implemented">Not implemented</span></td></tr>
+      <tr><td>KML map visualization of appointments</td><td><span class="status not-implemented">Not implemented</span></td></tr>
+      <tr><td>SMS integration and reminder schedule</td><td><span class="status not-implemented">Not implemented</span></td></tr>
+      <tr><td>Automated status tracking / auto no-show</td><td><span class="status not-implemented">Not implemented</span></td></tr>
+      <tr><td>Multi-capacity slot rules / max 3 participants per slot</td><td><span class="status not-implemented">Not implemented</span></td></tr>
+      <tr><td>Controlled overbooking</td><td><span class="status not-implemented">Not implemented</span></td></tr>
+      <tr><td>Data import from Excel or other sources</td><td><span class="status not-implemented">Not implemented</span></td></tr>
+      <tr><td>Re-entry handling workflow</td><td><span class="status not-implemented">Not implemented</span></td></tr>
+      <tr><td>Incorrect MEC booking correction workflow</td><td><span class="status not-implemented">Not implemented</span></td></tr>
+      <tr><td>Final project timeline clarification</td><td><span class="status not-implemented">Not implemented</span></td></tr>
+    </table>
+
+    <h2>Quick UAT Checklist</h2>
+    <ul class="checklist">
+      <li>Run <code>php artisan migrate:fresh --seed</code>.</li>
+      <li>Log in with <code>admin@example.com / admin123</code>.</li>
+      <li>Confirm <strong>Branches (MEC)</strong> contains MEC1, MEC2, MEC3.</li>
+      <li>Confirm branch create/edit screens have City, Address, and Map link fields.</li>
+      <li>On <code>/</code>, verify step 1 is branch-based and step 5 contains SPID, Sample Person Name, Mobile Number, Visit Stage, Interviewer ID, Supervisor ID, and Notes.</li>
+      <li>Confirm there is no participant email field and no pricing/payment display in the booking flow.</li>
+      <li>Complete a booking and confirm the success modal shows booking reference details without amount/payment content.</li>
+      <li>In <strong>All Appointments</strong>, confirm SPID, Branch, Visit, and modal-only participant metadata are present.</li>
+      <li>Open an appointment modal and confirm status options do not include <code>Pending payment</code>.</li>
+      <li>Open a branch report and confirm it contains only appointments for that branch.</li>
+      <li>Create a <code>View-Only</code> user and confirm they cannot update status.</li>
+      <li>Create an <code>Employee</code> user and confirm they only see/edit appointments they personally created.</li>
+      <li>Optionally verify branch snapshot fields in DB after moving a branch location.</li>
+      <li>Note current limitation: mobile validation is basic, and 1-hour duration is described in content but not enforced as a fixed slot rule.</li>
+    </ul>
+
+    <h2>Converting This Guide to PDF</h2>
+    <p>Use browser print to PDF, a Markdown PDF extension, or Pandoc:</p>
+    <pre>pandoc MEC-Implementation-and-Testing-Guide.md -o MEC-Implementation-and-Testing-Guide.pdf</pre>
+
+    <p class="meta" style="margin-top: 28px;"><em>This guide reflects the current codebase state relative to the MEC requirements document and intentionally excludes items the PDF marked for further clarification.</em></p>
+  </div>
+</body>
+</html>
