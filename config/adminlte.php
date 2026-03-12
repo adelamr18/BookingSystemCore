@@ -318,9 +318,9 @@ return [
             'route' => 'dashboard'
         ],
         [
-            'text' => ' All Appointments',
+            'text' => 'Appointments',
             'route' => 'appointments',
-            'icon' => 'fas fa-calendar-check',
+            'icon' => 'fas fa-fw fa-calendar-check',
             'can'  => 'appointments.view | appointments.create | appointments.edit | appointments.delete',
 
         ],
@@ -360,7 +360,7 @@ return [
                 ],
                 [
                     'text' => 'View All',
-                    'icon'    => 'fas fa-users',
+                    'icon'    => 'fas fa-fw fa-eye',
                     'route' => 'user.index',
                 ],
 
@@ -397,7 +397,7 @@ return [
             ],
         ],
         [
-            'text' => 'profile',
+            'text' => 'Profile',
             'route' => 'profile',
             'icon' => 'fas fa-fw fa-user',
 
